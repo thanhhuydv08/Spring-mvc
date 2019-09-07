@@ -1,0 +1,176 @@
+﻿=============================== cách cài =============
+=> mục đích thế mạnh : MVC
+tài liệu trong file spring frame work luôn trong docapi
+1- t?i b?n spring framework trên m?ng 
+2- tại eclip cài spring tool
+3- cấu hình dipatcherservlet trong file  web.xml
+
+- b1 : chép thư viện vào file lib của web-inf
+- b2 : cấu hình xml
+- b3 : khai báo tập tin cấu hình spring - khai báo control, view, viewh, handmaping
+
+
+========== thực hành ===================
+- cài spring tool trogn eclip
+- chép thư viện vào lib
+- vào file web sau thẻ   </welcome-file-list> ta ctr space 3 lần tới springDispatcherServlet enter để 
+config 	
+   + tại <param-value>/WEB-INF/dispatcher-config.xml</param-value> chỉnh theo giá trị này
+   + <url-pattern>url</url-pattern> thay bằng <url-pattern>/</url-pattern>
+
+- tao file dispatcher-config.xml thông qua spring framew ko phải tạo file xml thường.
+   + spring bean configure file xong next
+   + import check 3 đối tượng  beans - mvc- context bắt buộc
+- tạo mục views trong web-inf và controller trong src
+- tạo class trong controller như dưới giống file java controller đính kềm
+- tạo 1 jsp trang-chu.jsp để hiển thị lên
+
+==> cái này ko dùng servlet như mấy bài trước -> mục đích để tạo mô hình mVC đơn giản và hiệu quả.
+
+
+===============file đính kèm============
+ 1. dispatcher-config.xml nằm trong web-inf
+ <?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+	<mvc:annotation-driven />
+	<context:component-scan
+		base-package="controller" />
+	<mvc:resources location="/css/" mapping="/css/**" />
+	<mvc:resources location="/js/" mapping="/js/**" />
+	<mvc:resources location="/images/" mapping="/images/**" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+
+</beans>
+2.web.xml 
+       <?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+  <display-name>Spring_MVC</display-name>
+   <absolute-ordering />
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <!-- The front controller of this Spring Web application, responsible for handling all application requests -->
+	<servlet>
+		<servlet-name>springDispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/dispatcher-config.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- Map all requests to the DispatcherServlet for handling -->
+	<servlet-mapping>
+		<servlet-name>springDispatcherServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>
+3.trang-chu.jsp nằm trong views (do khai báo trong dispatcher-config.xml )
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Spring MVC</title>
+</head>
+<body>
+<h1 style="color: Blue; text-align: center;"> WellCome Spring Web MVC</h1>
+</body>
+</html>
+4. controller java 
+   package controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.Mapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class HomeController {
+ @RequestMapping(path = "")
+ public String Home() {
+	 return "trang-chu";// trang-chu la file jsp gốc
+ }
+}
+
+
+==================================== đi sâu vào controller=============================
+
+- so sánh khi dùng servlet thì muốn controler nhiều trang thì bấy nhiu controller dẫn đến phức tap
+- thì Spring hổ trợ 1 controller duy nhất nhuwg có thể ánh xạ đến nhiều trang thông qua @RequestMapping(path="/sua")...
+   đây là 1 anotation lớp ..thực hành theo file dưới 
+- ngầm định @RequestMapping(path="/loai-sua") là phương thức GET nếu muốn đổi phương thức a có cấu trúc sau @RequestMapping(path="/loai-sua", method=request.....POST)
+
+    + như vậy khi ta input giá trị và submit thì sẽ action tới đường dẫn của @RequestMapping(path="/loai-sua") là loai-sua : action="loai-sua" là 1 đường dẫn ta tự tạo trong class @RequestMapping(path="/loai-sua") ko phải là 1 loai-sua.jsp nhé.
+   chạy ban đầu   http://localhost:8080/Spring_MVC/  gọi tới trang them-loai thì gõ http://localhost:8080/Spring_MVC/loai-sua : ok
+
+ 1. class SuaController.java
+      
+package controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping(path="/sua")
+public class SuaController {
+	@RequestMapping(path="/them")
+	public String themSua() {
+		return "them-sua";
+	}
+	@RequestMapping(path="/tim")
+	public String timSua() {
+		return "tim-sua";
+	}
+	@RequestMapping(path="/xoa")
+	public String xoaSua() {
+		return "xoa-sua";
+	}
+}
+
+2. tại views/ ta thêm 3 file jsp (them-sua.jsp , tim-sua.jsp, xoa-sua.jsp) để khi tại 
+ address chỉ cần gõ http............../sua/them là chạy tới trang them-sua.
+
+
+
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
