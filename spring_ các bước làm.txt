@@ -155,7 +155,14 @@ public class SuaController {
     - diễn giả : thay vì dùng http://localhost:8080/Spring_MVC/danh-sach-loai-sua?maLoai=SB
                 thì khi dùng @PathVariable("ml") String maLoai) 
 		 http://localhost:8080/Spring_MVC/danh-sach-loai-sua/SB ==> ok 
+4. Model trong Spring giống request HTTP .
 
+@RequestMapping(path = "/danh-sach-loai-sua")
+		public String danhSachLoaiSua(Model model) {
+			List<LoaiSua> dsls = LoaiSuaBL.DocTatCa();
+			model.addAttribute("dsls", dsls);	//request.setAttribute("dsls",dsls)
+			return "danh-sach-loai-sua";		//request.getRequestDispatcher("WEB-INF/views/danh-sach-loai-sua.jsp").forward(request,response)
+		}
 
 
 
