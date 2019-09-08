@@ -20,7 +20,7 @@ config
 
 - tao file dispatcher-config.xml thông qua spring framew ko phải tạo file xml thường.
    + spring bean configure file xong next
-   + import check 3 đối tượng  beans - mvc- context bắt buộc
+   + import check 3 đối tượng jdbc- beans - mvc- context bắt buộc
 - tạo mục views trong web-inf và controller trong src
 - tạo class trong controller như dưới giống file java controller đính kềm
 - tạo 1 jsp trang-chu.jsp để hiển thị lên
