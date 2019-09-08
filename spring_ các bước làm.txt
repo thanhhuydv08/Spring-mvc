@@ -149,10 +149,12 @@ public class SuaController {
 
 2. tại views/ ta thêm 3 file jsp (them-sua.jsp , tim-sua.jsp, xoa-sua.jsp) để khi tại 
  address chỉ cần gõ http............../sua/them là chạy tới trang them-sua.
-
-
-
-- 
+ 3. Biến đường dẫn @PathVariable
+ @RequestMapping(path = "/danh-sach-loai-sua/{ml}")
+ @RequestMapping có @PathVariable("ml") String maLoai) 
+    - diễn giả : thay vì dùng http://localhost:8080/Spring_MVC/danh-sach-loai-sua?maLoai=SB
+                thì khi dùng @PathVariable("ml") String maLoai) 
+		 http://localhost:8080/Spring_MVC/danh-sach-loai-sua/SB ==> ok 
 
 
 
