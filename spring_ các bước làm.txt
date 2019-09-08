@@ -149,21 +149,136 @@ public class SuaController {
 
 2. tại views/ ta thêm 3 file jsp (them-sua.jsp , tim-sua.jsp, xoa-sua.jsp) để khi tại 
  address chỉ cần gõ http............../sua/them là chạy tới trang them-sua.
- 3. Biến đường dẫn @PathVariable
+
+ 3. Bi?n du?ng d?n @PathVariable
  @RequestMapping(path = "/danh-sach-loai-sua/{ml}")
  @RequestMapping có @PathVariable("ml") String maLoai) 
-    - diễn giả : thay vì dùng http://localhost:8080/Spring_MVC/danh-sach-loai-sua?maLoai=SB
+    - di?n gi? : thay vì dùng http://localhost:8080/Spring_MVC/danh-sach-loai-sua?maLoai=SB
                 thì khi dùng @PathVariable("ml") String maLoai) 
 		 http://localhost:8080/Spring_MVC/danh-sach-loai-sua/SB ==> ok 
-4. Model trong Spring giống request HTTP .
+4. Model trong Spring gi?ng request HTTP .
 
 @RequestMapping(path = "/danh-sach-loai-sua")
 		public String danhSachLoaiSua(Model model) {
 			List<LoaiSua> dsls = LoaiSuaBL.DocTatCa();
 			model.addAttribute("dsls", dsls);	//request.setAttribute("dsls",dsls)
 			return "danh-sach-loai-sua";		//request.getRequestDispatcher("WEB-INF/views/danh-sach-loai-sua.jsp").forward(request,response)
+
 		}
 
+============th?c hành LoaiSua dùng bài h?c 3.@PathVariable===================
+   1. ThemLoaiController : theo project Spring_MVC trên mediafire l?n 2
+           @RequestMapping(path = "/danh-sach-loai-sua")
+		public String danhSachLoaiSua(Model model) {
+			List<LoaiSua> dsls = LoaiSuaBL.DocTatCa();
+			model.addAttribute("dsls", dsls);	//request.setAttribute("dsls",dsls)
+			return "danh-sach-loai-sua";		//request.getRequestDispatcher("WEB-INF/views/danh-sach-loai-sua.jsp").forward(request,response)
+		}
+		@RequestMapping(path = "/danh-sach-loai-sua/{ml}")
+		public String danhSachLoaiSua(Model model,@PathVariable("ml") String maLoai) {
+			List<LoaiSua> dsls = LoaiSuaBL.docTheoMaLoai(maLoai);
+			model.addAttribute("dsls", dsls);
+			return "danh-sach-loai-sua";	
+		}
+   2. LoaiSuaBL
+     public static List<LoaiSua> docTheoMaLoai (String maLoai){
+		List<LoaiSua> dsls= null;
+		try (Session session = CSDL.getFactory().openSession()){
+			String sql = "select ls from LoaiSua ls where ls.maLoaiSua = :maLoaiSua";
+			// sql cÃ³ tham sá»‘ thÃ¬ :tÃªn biáº¿n va phÃ­a duoiws setparam no la ok
+			Query<LoaiSua> query = session.createQuery(sql, LoaiSua.class);
+			query.setParameter("maLoaiSua", maLoai);
+	
+			dsls =  query.list();
+		} catch (Exception e) {
+			return null;
+		}
+		return dsls;
+	}
+   3. danh-sach-loai-sua.jsp 
+	<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Danh sách lo?i s?a</title>
+</head>
+<body>
+<table border="1">
+	<caption>DANH SÁCH LO?I S?A</caption>
+	<tr>
+		<th>Mã lo?i</th>
+		<th>Tên lo?i</th>
+	</tr>
+	<c:forEach items="${dsls}" var="ls">
+		<tr>
+		<td>${ls.maLoaiSua }</td>
+		<td>${ls.tenLoai }</td>
+		</tr>
+	</c:forEach>
+</table>
+</body>
+</html>
+
+
+===================================tham số yêu cầu @RequestParam() chức năng giống @PathVariable ===============
+so sánh 2 chức năng để phân biệt
+ nháp {ds-loai-sua/{ml}}
+
+1- chức năng giống @Pathvariable 
+2- cách dùng : http://localhost:8080/Spring_MVC/ds-loai-sua?maLoai=SB  
+3- vd : 	@RequestMapping(path = "/ds-loai-sua")
+		public String dsLoaiSua(Model model,@RequestParam("maLoai") String ml) {
+			List<LoaiSua> dsls = LoaiSuaBL.docTheoMaLoai(ml);
+			model.addAttribute("dsls", dsls);
+			return "danh-sach-loai-sua";	
+		}
+
+===================================== javaBean : trùng tên mới chuyển được========================
+
+1- thay vì làm các lệnh trên thì khi chúng ta đặt biến trong trang jsp trùng với đối tượng vd : Sua, LoaiSua.....vd biến là maLoai,tenLoai...
+
+
+    	@RequestMapping(path="/loai-sua",method=RequestMethod.POST)
+	public String loaiSua(HttpServletRequest request) {
+		String maLoai, tenLoai;
+		maLoai = request.getParameter("txtMaLoai");
+		tenLoai = request.getParameter("txtTenLoai");
+		
+		LoaiSua ls = new LoaiSua();
+		ls.setMaLoai(maLoai);
+		ls.setTenLoai(tenLoai);
+		
+		LoaiSuaBL.them(ls);
+		return "loai-sua";
+	}
+===> thì Spring đã làm hết cho Ta
+
+   bằng dòng lệnh sau :
+   	@RequestMapping(path="/loai-sua",method=RequestMethod.POST)
+	public String loaiSua(LoaiSua ls) {
+		LoaiSuaBL.them(ls);
+		return "loai-sua";
+	}
+
+======================================== @ResponBody  Trả về nội dung thay vì tên view các trường hợp phía trên ===========
+1- cấu trúc
+ @ResponBody 
+ public String abc(){
+  return "Day la ket qua tra ve cua phuong thuc";
+}
+
+======================================== @ResponBody return "redirect:/paths...." trả về trang jsp ngoiaf views cấu hình của Spring   ===========
+1- vd : tao 1 trang index.jsp nằm ngoai views trong Webcontent
+2- cấu trúc : 
+    @RequestMapping(path = "/index")
+ @ResponseBody
+ public String index() { 
+ return"redirect:/index.jsp";
+}
+==========================================
 
 
 
